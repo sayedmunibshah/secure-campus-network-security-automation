@@ -1,0 +1,7 @@
+{
+  "device": "SW-Staff",
+  "audit_time_utc": "2026-10-19T16:25:37.079403+00:00",
+  "finding_count": 0,
+  "findings": [],
+  "scope_note": "Results apply only to the supplied sanitized configuration extract. They do not prove live device state or complete network security."
+}

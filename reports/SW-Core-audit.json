@@ -1,0 +1,15 @@
+{
+  "device": "SW-Core",
+  "audit_time_utc": "2026-10-19T16:25:33.298794+00:00",
+  "finding_count": 1,
+  "findings": [
+    {
+      "severity": "INFO",
+      "rule_id": "ACL-001",
+      "title": "ACL guest-in defined but not shown attached",
+      "evidence": "The extract defines guest-in, but no interface attachment for that ACL was found.",
+      "recommendation": "Verify whether this ACL is intentionally unused or whether its attachment is missing from the extract."
+    }
+  ],
+  "scope_note": "Results apply only to the supplied sanitized configuration extract. They do not prove live device state or complete network security."
+}

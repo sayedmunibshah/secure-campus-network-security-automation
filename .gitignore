@@ -1,0 +1,22 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+credentials*
+secrets*
+*.key
+*.pem
+
+# Generated local artifacts
+*.log
+
+# Packet Tracer files (keep local; repository can document how to obtain them)
+*.pkt
+
+# Git
+.git/
