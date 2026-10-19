@@ -1,75 +1,150 @@
 # Secure Multi-Department Campus Network with Security Automation
 
-## Overview
-A Cisco Packet Tracer campus network combined with a Python tool that audits sanitized Cisco IOS configuration extracts and generates JSON reports.
+## About This Project
+
+I built this project to practice network design, VLAN configuration, and basic network security using Cisco Packet Tracer.
+
+The idea was to create a small campus network with separate networks for Admin, IT, Staff, and Guest users. I also wanted to add something beyond normal network configuration, so I developed a Python script that checks selected security settings in Cisco IOS configuration files and generates JSON reports.
+
+This project helped me combine networking with Python automation.
 
 ## Network Design
 
-| VLAN | Department | Subnet | Gateway |
+I divided the network into VLANs so that each department has its own subnet.
+
+| VLAN | Department | Network | Gateway |
 |---|---|---|---|
 | 10 | Admin | 192.168.10.0/24 | 192.168.10.1 |
 | 20 | IT | 192.168.20.0/24 | 192.168.20.1 |
 | 30 | Staff | 192.168.30.0/24 | 192.168.30.1 |
 | 40 | Guest | 192.168.40.0/24 | 192.168.40.1 |
 | 99 | Management | 192.168.99.0/24 | 192.168.99.1 |
-| 999 | Parking | No user subnet | N/A |
+| 999 | Parking VLAN | No user subnet | N/A |
 
-## Devices
-- SW-Core: multilayer switch and inter-VLAN routing.
-- SW-Admin: Admin and IT access switch.
-- SW-Staff: Staff and Guest access switch.
-- Four PCs represent the client networks.
+### Devices Used
 
-## Security Controls
-- VLAN segmentation and trunk links.
-- SSH version 2 and SSH-only remote management in the supplied extracts.
-- Local VTY authentication configuration.
-- Access-port security using sticky MAC learning and restrict mode.
-- Unused ports assigned to VLAN 999 and shut down.
-- GUEST-IN ACL intended to restrict Guest access to internal subnets.
+- **SW-Core:** Multilayer switch used for inter-VLAN routing.
+- **SW-Admin:** Access switch for Admin and IT PCs.
+- **SW-Staff:** Access switch for Staff and Guest PCs.
+- **Four PCs:** Used to test network connectivity and guest isolation.
+
+I configured the uplinks between the switches as trunks to carry the required VLANs.
+
+## Security Configuration
+
+These are the main security controls I worked on:
+
+- Separated departments using VLANs.
+- Configured SSH version 2 for remote management in the supplied configurations.
+- Configured local authentication for remote terminal access.
+- Enabled port security on selected access ports using sticky MAC addresses and restrict mode.
+- Assigned unused core-switch ports to VLAN 999 and shut them down.
+- Created a `GUEST-IN` access control list (ACL) intended to restrict Guest access to internal networks.
+
+I also tested connectivity between the PCs and checked whether Guest traffic could reach internal networks.
+
+**Important limitation:** The guest-isolation tests showed failed pings to the tested internal destinations, but the supplied core configuration does not show `GUEST-IN` attached to the core's VLAN 40 interface. The result alone does not prove that the intended core ACL is correctly implemented. This is a configuration issue I still need to verify and resolve.
 
 ## Python Configuration Auditor
-Script: `scripts/audit_config.py`
 
-The auditor checks selected SSH, HTTP management, VTY, port-security, and ACL configuration settings. It generates JSON reports.
+I wrote a Python script to check selected security settings in saved Cisco IOS configuration extracts.
 
-### Run the audits
+File: `scripts/audit_config.py`
+
+The script checks things such as:
+
+- SSH configuration.
+- Whether HTTP management is enabled.
+- VTY remote-access settings and authentication.
+- Port security on access ports.
+- Port-security violation settings.
+- Guest-port ACL attachment.
+- ACLs that are defined but not shown as attached.
+
+The script produces JSON reports so the findings can be reviewed later.
+
+### How to Run It
+
+Run these commands from the project directory.
+
+**Audit the core switch:**
+
 ```bash
 python3 scripts/audit_config.py configs/SW-Core.cfg --device SW-Core --output reports/SW-Core-audit.json
+```
+
+**Audit the Admin switch:**
+
+```bash
 python3 scripts/audit_config.py configs/SW-Admin.cfg --device SW-Admin --output reports/SW-Admin-audit.json
+```
+
+**Audit the Staff switch:**
+
+```bash
 python3 scripts/audit_config.py configs/SW-Staff.cfg --device SW-Staff --output reports/SW-Staff-audit.json
 ```
 
-### Run the tests
+### Run the Unit Tests
+
+I added unit tests to check whether the auditor detects selected configuration problems and handles expected cases.
+
 ```bash
 python3 -m unittest discover -s tests -v
 ```
 
-The current test suite has seven tests, all of which passed during the latest validation.
+The seven tests passed during my latest validation.
 
 ## Current Audit Results
-- SW-Admin: 0 findings from the current checks.
-- SW-Core: 1 informational finding — GUEST-IN is defined but not shown attached in the supplied core configuration extract.
-- SW-Staff: 0 findings from the current checks.
 
-Zero findings do not prove that a device is completely secure. The auditor checks only selected rules against the supplied text.
+The latest reports show:
 
-## Repository Contents
-- `configs/`: sanitized switch configuration extracts.
-- `evidence/`: topology, switch, and connectivity screenshots.
-- `reports/`: JSON audit reports.
-- `scripts/`: Python audit script.
-- `tests/`: unit tests.
-- Packet Tracer project files (`.pkt`) are kept locally and excluded from Git, including the backup.
+- **SW-Admin:** 0 findings from the selected checks.
+- **SW-Core:** 1 informational finding — `GUEST-IN` is defined but is not shown attached in the supplied core configuration extract.
+- **SW-Staff:** 0 findings from the selected checks.
+
+These results are based on the saved configuration files included in this repository. Zero findings do not mean that a switch or the entire network is completely secure.
+
+## Repository Structure
+
+- `configs/` — Sanitized switch configuration extracts.
+- `evidence/` — Screenshots of the topology, switch configurations, and connectivity tests.
+- `reports/` — JSON reports generated by the auditor.
+- `scripts/` — Python configuration-auditing script.
+- `tests/` — Unit tests for the auditor.
+
+The Packet Tracer `.pkt` project files are currently kept locally and excluded from Git. As a result, this repository contains the configuration extracts, screenshots, reports, and Python code, but not the actual Packet Tracer project file.
 
 ## Limitations
-This is an educational simulation, not a production deployment. Packet Tracer may differ from physical hardware. The auditor checks configuration text, not live device state, and is not a complete security or compliance assessment.
 
-## Technologies
-Cisco Packet Tracer, Cisco IOS-style configuration, Python 3, regular expressions, JSON, unittest, Ubuntu Linux.
+This is a learning project built in a simulated environment, not a production network.
+
+The Python script checks configuration text rather than connecting to switches or verifying their live state. It checks only selected rules and does not replace a complete security audit.
+
+Some behavior in Packet Tracer may also differ from physical Cisco equipment. The guest-isolation ACL attachment needs further verification before I can claim that the intended control is fully implemented.
+
+## Technologies Used
+
+- Cisco Packet Tracer
+- Cisco IOS-style configuration
+- Python 3
+- Regular expressions
+- JSON
+- Python `unittest`
+- Ubuntu Linux
+
+## What I Learned
+
+While working on this project, I practiced VLAN planning, inter-VLAN routing, trunk configuration, access-port security, ACL concepts, and connectivity testing.
+
+I also gained experience writing a Python script to inspect configuration files, report selected security findings, and test the script with unit tests.
+
+My next step is to verify the Guest ACL behavior, improve the auditor as I learn more, and continue building practical networking and security automation projects.
 
 ## Responsible Use
-Use this project only in authorized labs. Never publish real credentials, password hashes, or private configurations.
 
-## Author
-Software Engineering student focused on networking, network security, and automation.
+This project is intended for education and authorized lab environments. The configuration extracts should remain sanitized, and real credentials, password hashes, and private network configurations should never be published.
+
+## About Me
+
+I am a Software Engineering student interested in networking, network security, and automation. I am building practical projects to strengthen my skills and document what I learn along the way.
