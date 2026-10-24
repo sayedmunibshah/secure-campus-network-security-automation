@@ -43,7 +43,7 @@ These are the main security controls I worked on:
 
 I also tested connectivity between the PCs and checked whether Guest traffic could reach internal networks.
 
-**Important limitation:** The guest-isolation tests showed failed pings to the tested internal destinations, but the supplied core configuration does not show `GUEST-IN` attached to the core's VLAN 40 interface. The result alone does not prove that the intended core ACL is correctly implemented. This is a configuration issue I still need to verify and resolve.
+**Important limitation:** The guest-isolation tests showed failed pings to the tested internal destinations, but the supplied core configuration does not show `GUEST-IN` attached to the core's VLAN 40 interface. The result alone does not prove that the intended core ACL is correctly implemented. The ACL attachment remains unverified in the supplied core configuration extract, so this is documented as a limitation rather than a confirmed live-network failure.
 
 ## Python Configuration Auditor
 
